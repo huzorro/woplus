@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	//	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -188,12 +189,11 @@ func (self *V2Handler) SProcess(msg *sexredis.Msg) {
 		}
 		sa.Add(tag, value)
 	}
-	unescape, _ := url.QueryUnescape(sa.Encode())
+	unescape, _ := url.QueryUnescape(tools.Encode(sa))
 	v.Signature = tools.HmacSha1(unescape, self.c.AppSecret)
-
 	vvcode, err := json.Marshal(v)
 
-	log.Println(unescape, self.c.AppSecret, string(vvcode))
+	//	log.Println(unescape, self.c.AppSecret, string(vvcode))
 	//跳过https证书校验
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
