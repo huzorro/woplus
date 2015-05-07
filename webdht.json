@@ -1,0 +1,15 @@
+{
+	"V1ReceiveQueueName":"webdht:vr1:receive:queue",
+	"V2ReceiveQueueName":"webdht:vr2:receive:queue",
+	"V1RequestQueueName":"vr1:request:queue",
+	"V2RequestQueueName":"vr2:request:queue",		
+	"Authorization":"",
+	"ContentType":"application/json; charset=UTF-8",
+	"Accept":"application/json",
+	"AppKey":"3df4537b7e8328c4b1c14bcd2f1bd972ad789da4",
+	"AppSecret":"3df4537b7e8328c4b1c14bcd2f1bd972ad789da4&6e02a4e93a660788cc6148329fb7fc5e9ed2f385",
+	"Token":"0c591450bf7d4e097e17a623ec9692480338d593",
+	"V1ReqUri":"https://open.wo.com.cn/openapi/rpc/paymentcodesms/v2.0",	
+	"V2ReqUri":"https://open.wo.com.cn/openapi/rpc/apppayment/v2.0",
+	"SignType":"HMAC-SHA1"
+}

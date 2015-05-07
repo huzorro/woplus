@@ -1,0 +1,15 @@
+{
+	"V1ReceiveQueueName":"webazly:vr1:receive:queue",
+	"V2ReceiveQueueName":"webazly:vr2:receive:queue",
+	"V1RequestQueueName":"vr1:request:queue",
+	"V2RequestQueueName":"vr2:request:queue",	
+	"Authorization":"",
+	"ContentType":"application/json; charset=UTF-8",
+	"Accept":"application/json",
+	"AppKey":"093d0923a87e5c54da272915a84635e9cf65c4bb",
+	"AppSecret":"093d0923a87e5c54da272915a84635e9cf65c4bb&68f71ec635bb79a1fbb68715d2fef13ded02e551",
+	"Token":"5766a0a06fc094f7a0fa59881bc4bd41f5a5e539",
+	"V1ReqUri":"https://open.wo.com.cn/openapi/rpc/paymentcodesms/v2.0",	
+	"V2ReqUri":"https://open.wo.com.cn/openapi/rpc/apppayment/v2.0",
+	"SignType":"HMAC-SHA1"
+}

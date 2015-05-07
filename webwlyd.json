@@ -1,0 +1,15 @@
+{
+	"V1ReceiveQueueName":"webwlyd:vr1:receive:queue",
+	"V2ReceiveQueueName":"webwlyd:vr2:receive:queue",
+	"V1RequestQueueName":"vr1:request:queue",
+	"V2RequestQueueName":"vr2:request:queue",		
+	"Authorization":"",
+	"ContentType":"application/json; charset=UTF-8",
+	"Accept":"application/json",
+	"AppKey":"837750364ac8a93f68fa72f54889a6e37b0582f6",
+	"AppSecret":"837750364ac8a93f68fa72f54889a6e37b0582f6&461d0f77c8e74eb380637d2521d32392d957383c",
+	"Token":"553729721b85c214565ddf2f3db7f13beecb6bcf",
+	"V1ReqUri":"https://open.wo.com.cn/openapi/rpc/paymentcodesms/v2.0",	
+	"V2ReqUri":"https://open.wo.com.cn/openapi/rpc/apppayment/v2.0",
+	"SignType":"HMAC-SHA1"
+}

@@ -121,7 +121,7 @@ func (self *V1Handler) SProcess(msg *sexredis.Msg) {
 		return
 	}
 	queue := sexredis.New()
-	queue.SetRClient(VR1_REQUEST_QUEUE_NAME, rc)
+	queue.SetRClient(self.c.V1RequestQueueName, rc)
 	js, err := json.Marshal(vr)
 	log.Printf("vr1 request >> reply %s", string(js))
 	if err != nil {
@@ -247,7 +247,7 @@ func (self *V2Handler) SProcess(msg *sexredis.Msg) {
 		return
 	}
 	queue := sexredis.New()
-	queue.SetRClient(VR2_REQUEST_QUEUE_NAME, rc)
+	queue.SetRClient(self.c.V2RequestQueueName, rc)
 	js, err := json.Marshal(vr)
 	log.Printf("vr2 request >> reply %s", string(js))
 	if err != nil {

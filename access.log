@@ -1,0 +1,10 @@
+
+2015/05/07 12:23:57 logger.go:22: Started GET /receiver/v1 for 127.0.0.1:45755
+
+2015/05/07 12:23:57 woplus.go:125: receive v1 {"paymentUser":"13001014026","paymentType":0,"outTradeNo":"00000020150429174812","paymentAcount":"001","subject":"do","totalFee":0.05}
+
+2015/05/07 12:23:57 logger.go:27: Completed 200 OK in 1.223969ms
+
+2015/05/07 12:23:58 logger.go:22: Started GET /favicon.ico for 127.0.0.1:45755
+
+2015/05/07 12:23:58 logger.go:27: Completed 404 Not Found in 289.632µs

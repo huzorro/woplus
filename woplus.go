@@ -25,25 +25,20 @@ const (
 	RESPONSE_GET_MT_NOK_TEXT = "{\"response\":\"NOK\", \"text\":\"GETMT\"}"
 )
 
-const (
-	V1_RECEIVE_QUEUE_NAME = "v1:receive:queue"
-	V2_RECEIVE_QUEUE_NAME = "v2:receive:queue"
-)
-const (
-	VR1_REQUEST_QUEUE_NAME = "vr1:request:queue"
-	VR2_REQUEST_QUEUE_NAME = "vr2:request:queue"
-)
-
 type Cfg struct {
-	Authorization string
-	ContentType   string
-	Accept        string
-	AppKey        string
-	AppSecret     string
-	Token         string
-	V1ReqUri      string
-	V2ReqUri      string
-	SignType      string
+	V1ReceiveQueueName string
+	V2ReceiveQueueName string
+	V1RequestQueueName string
+	V2RequestQueueName string
+	Authorization      string
+	ContentType        string
+	Accept             string
+	AppKey             string
+	AppSecret          string
+	Token              string
+	V1ReqUri           string
+	V2ReqUri           string
+	SignType           string
 }
 
 type VCode struct {
@@ -96,7 +91,7 @@ type V2R struct {
 	R V2Result
 }
 
-func receiverV1(r *http.Request, w http.ResponseWriter, log *log.Logger, redisPool *sexredis.RedisPool) (int, string) {
+func receiverV1(r *http.Request, w http.ResponseWriter, log *log.Logger, redisPool *sexredis.RedisPool, cfg *Cfg) (int, string) {
 	r.ParseForm()
 	var vCode VCode
 	vType := reflect.TypeOf(&vCode).Elem()
@@ -126,7 +121,7 @@ func receiverV1(r *http.Request, w http.ResponseWriter, log *log.Logger, redisPo
 	}
 
 	queue := sexredis.New()
-	queue.SetRClient(V1_RECEIVE_QUEUE_NAME, rc)
+	queue.SetRClient(cfg.V1ReceiveQueueName, rc)
 	log.Printf("receive v1 %s", string(js))
 
 	if err != nil {
@@ -141,7 +136,7 @@ func receiverV1(r *http.Request, w http.ResponseWriter, log *log.Logger, redisPo
 	return http.StatusOK, RESPONSE_OK_TEXT
 }
 
-func receiverV2(r *http.Request, w http.ResponseWriter, log *log.Logger, redisPool *sexredis.RedisPool) (int, string) {
+func receiverV2(r *http.Request, w http.ResponseWriter, log *log.Logger, redisPool *sexredis.RedisPool, cfg *Cfg) (int, string) {
 	r.ParseForm()
 	var vCode V2Code
 	vType := reflect.TypeOf(&vCode).Elem()
@@ -173,7 +168,7 @@ func receiverV2(r *http.Request, w http.ResponseWriter, log *log.Logger, redisPo
 	}
 
 	queue := sexredis.New()
-	queue.SetRClient(V2_RECEIVE_QUEUE_NAME, rc)
+	queue.SetRClient(cfg.V2ReceiveQueueName, rc)
 
 	if err != nil {
 		log.Printf("json marshal fails %s", err)
@@ -224,6 +219,8 @@ func main() {
 		panic(err.Error())
 	}
 
+	mtn.Map(&cfg)
+
 	if *receiverPtr {
 		mtn.Get("/receiver/v1", receiverV1)
 		mtn.Get("/receiver/v2", receiverV2)
@@ -241,7 +238,7 @@ func main() {
 		}
 		defer redisPool.Close(rc)
 		queue := sexredis.New()
-		queue.SetRClient(V1_RECEIVE_QUEUE_NAME, rc)
+		queue.SetRClient(cfg.V1ReceiveQueueName, rc)
 		queue.Worker(2, true, &V1Handler{redisPool, &cfg})
 	}
 
@@ -253,7 +250,7 @@ func main() {
 		}
 		defer redisPool.Close(rc)
 		queue := sexredis.New()
-		queue.SetRClient(V2_RECEIVE_QUEUE_NAME, rc)
+		queue.SetRClient(cfg.V2ReceiveQueueName, rc)
 		queue.Worker(2, true, &V2Handler{redisPool, &cfg})
 	}
 	done := make(chan bool)
