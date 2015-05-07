@@ -274,7 +274,7 @@ func main() {
 		defer redisPool.Close(rc)
 		queue := sexredis.New()
 		queue.SetRClient(cfg.V1ReceiveQueueName, rc)
-		queue.Worker(2, true, &V1Handler{redisPool, &cfg})
+		queue.Worker(2, true, &V1Handler{redisPool, &cfg, logger})
 	}
 
 	if *v2HandlerPtr {
@@ -286,7 +286,7 @@ func main() {
 		defer redisPool.Close(rc)
 		queue := sexredis.New()
 		queue.SetRClient(cfg.V2ReceiveQueueName, rc)
-		queue.Worker(2, true, &V2Handler{redisPool, &cfg})
+		queue.Worker(2, true, &V2Handler{redisPool, &cfg, logger})
 	}
 	done := make(chan bool)
 	<-done

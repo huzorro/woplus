@@ -18,17 +18,19 @@ import (
 )
 
 type V1Handler struct {
-	p *sexredis.RedisPool
-	c *Cfg
+	p   *sexredis.RedisPool
+	c   *Cfg
+	log *log.Logger
 }
 
 type V2Handler struct {
-	p *sexredis.RedisPool
-	c *Cfg
+	p   *sexredis.RedisPool
+	c   *Cfg
+	log *log.Logger
 }
 
 func (self *V1Handler) SProcess(msg *sexredis.Msg) {
-	log.Printf("v1 process start... %+v", msg)
+	self.log.Printf("v1 process start... %+v", msg)
 	var (
 		vCode string
 		ok    bool
@@ -37,7 +39,7 @@ func (self *V1Handler) SProcess(msg *sexredis.Msg) {
 	)
 	//msg type ok ?
 	if vCode, ok = msg.Content.(string); !ok {
-		log.Printf("Msg type error %+", msg)
+		self.log.Printf("Msg type error %+", msg)
 		msg.Err = errors.New("Msg type error")
 		return
 	}
@@ -71,7 +73,7 @@ func (self *V1Handler) SProcess(msg *sexredis.Msg) {
 
 	req, err := http.NewRequest("POST", self.c.V1ReqUri, strings.NewReader(vCode))
 	if err != nil {
-		log.Printf("v1 request fails %s", err)
+		self.log.Printf("v1 request fails %s", err)
 		msg.Err = errors.New("v1 request fails")
 		return
 	}
@@ -83,30 +85,30 @@ func (self *V1Handler) SProcess(msg *sexredis.Msg) {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		log.Printf("post request fails %s", err)
+		self.log.Printf("post request fails %s", err)
 		msg.Err = errors.New("post request fails")
 		return
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("v2 response body read fails %s", err)
+		self.log.Printf("v2 response body read fails %s", err)
 		msg.Err = errors.New("v2 response body read fails")
 		return
 	}
 	defer resp.Body.Close()
 
 	if err != nil {
-		log.Printf("v1 response fails %s", err)
+		self.log.Printf("v1 response fails %s", err)
 		msg.Err = errors.New("v1 response fails")
 		return
 	}
 	if err := json.Unmarshal([]byte(vCode), &v); err != nil {
-		log.Printf("v1 josn Unmarshal fails %s", err)
+		self.log.Printf("v1 josn Unmarshal fails %s", err)
 		msg.Err = errors.New("json Unmarshal fails")
 		return
 	}
 	if err := json.Unmarshal(body, &r); err != nil {
-		log.Printf("v1 josn Unmarshal fails %s", err)
+		self.log.Printf("v1 josn Unmarshal fails %s", err)
 		msg.Err = errors.New("json Unmarshal fails")
 		return
 	}
@@ -116,28 +118,28 @@ func (self *V1Handler) SProcess(msg *sexredis.Msg) {
 	defer self.p.Close(rc)
 
 	if err != nil {
-		log.Printf("get redis connection fails %s", err)
+		self.log.Printf("get redis connection fails %s", err)
 		msg.Err = errors.New("get redis connection fails")
 		return
 	}
 	queue := sexredis.New()
 	queue.SetRClient(self.c.V1RequestQueueName, rc)
 	js, err := json.Marshal(vr)
-	log.Printf("vr1 request >> reply %s", string(js))
+	self.log.Printf("vr1 request >> reply %s", string(js))
 	if err != nil {
-		log.Printf("json marshal fails %s", err)
+		self.log.Printf("json marshal fails %s", err)
 		msg.Err = errors.New("json marshal fails")
 		return
 	}
 	if _, err := queue.Put(js); err != nil {
-		log.Printf("put vr1 request >> reply into queue fails %s", err)
+		self.log.Printf("put vr1 request >> reply into queue fails %s", err)
 		msg.Err = errors.New("put vr1 request >> reply into queue fails")
 		return
 	}
 }
 
 func (self *V2Handler) SProcess(msg *sexredis.Msg) {
-	log.Printf("v1 process start... %+v", msg)
+	self.log.Printf("v1 process start... %+v", msg)
 	var (
 		vCode string
 		ok    bool
@@ -146,7 +148,7 @@ func (self *V2Handler) SProcess(msg *sexredis.Msg) {
 	)
 	//msg type ok ?
 	if vCode, ok = msg.Content.(string); !ok {
-		log.Printf("Msg type error %+", msg)
+		self.log.Printf("Msg type error %+", msg)
 		msg.Err = errors.New("Msg type error")
 		return
 	}
@@ -157,7 +159,7 @@ func (self *V2Handler) SProcess(msg *sexredis.Msg) {
 	self.c.Authorization, _ = url.QueryUnescape(strings.Replace(hp.Encode(), "&", ",", -1))
 	//时间戳/签名
 	if err := json.Unmarshal([]byte(vCode), &v); err != nil {
-		log.Printf("josn Unmarshal fails %s", err)
+		self.log.Printf("josn Unmarshal fails %s", err)
 		msg.Err = errors.New("json Unmarshal fails")
 		return
 	}
@@ -201,7 +203,7 @@ func (self *V2Handler) SProcess(msg *sexredis.Msg) {
 	client := &http.Client{Transport: tr}
 	req, err := http.NewRequest("POST", self.c.V2ReqUri, strings.NewReader(string(vvcode)))
 	if err != nil {
-		log.Printf("v2 request fails %s", err)
+		self.log.Printf("v2 request fails %s", err)
 		msg.Err = errors.New("v2 request fails")
 		return
 	}
@@ -212,27 +214,27 @@ func (self *V2Handler) SProcess(msg *sexredis.Msg) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("v2 request fails %s", err)
+		self.log.Printf("v2 request fails %s", err)
 		msg.Err = errors.New("v2 request fails")
 		return
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("v2 response body read fails %s", err)
+		self.log.Printf("v2 response body read fails %s", err)
 		msg.Err = errors.New("v2 response body read fails")
 		return
 	}
 	defer resp.Body.Close()
 
 	if err != nil {
-		log.Printf("v2 response fails %s", err)
+		self.log.Printf("v2 response fails %s", err)
 		msg.Err = errors.New("v2 response fails")
 		return
 	}
 
 	if err := json.Unmarshal(body, &r); err != nil {
-		log.Printf("josn Unmarshal fails %s", err)
+		self.log.Printf("josn Unmarshal fails %s", err)
 		msg.Err = errors.New("json Unmarshal fails")
 		return
 	}
@@ -242,21 +244,21 @@ func (self *V2Handler) SProcess(msg *sexredis.Msg) {
 	defer self.p.Close(rc)
 
 	if err != nil {
-		log.Printf("get redis connection fails %s", err)
+		self.log.Printf("get redis connection fails %s", err)
 		msg.Err = errors.New("get redis connection fails")
 		return
 	}
 	queue := sexredis.New()
 	queue.SetRClient(self.c.V2RequestQueueName, rc)
 	js, err := json.Marshal(vr)
-	log.Printf("vr2 request >> reply %s", string(js))
+	self.log.Printf("vr2 request >> reply %s", string(js))
 	if err != nil {
-		log.Printf("json marshal fails %s", err)
+		self.log.Printf("json marshal fails %s", err)
 		msg.Err = errors.New("json marshal fails")
 		return
 	}
 	if _, err := queue.Put(js); err != nil {
-		log.Printf("put vr2 request >> reply into queue fails %s", err)
+		self.log.Printf("put vr2 request >> reply into queue fails %s", err)
 		msg.Err = errors.New("put vr2 request >> reply into queue fails")
 		return
 	}
