@@ -14,6 +14,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -89,6 +90,38 @@ type VR struct {
 type V2R struct {
 	V V2Code
 	R V2Result
+}
+
+func reviewV1Request(r *http.Request, w http.ResponseWriter, log *log.Logger, redisPool *sexredis.RedisPool, cfg *Cfg) (int, string) {
+	w.Header().Set("Content-Type", "text/html;charset=UTF-8")
+	rc, err := redisPool.Get()
+	defer redisPool.Close(rc)
+	if err != nil {
+		log.Printf("get redis connection of pool fails %s", err)
+		return http.StatusInternalServerError, RESPONSE_REDIS_NOK_TEXT
+	}
+	ret, _ := rc.LRange(cfg.V1RequestQueueName, 0, -1)
+	rev := make([]string, 0)
+	for i := len(ret) - 1; i >= 0; i-- {
+		rev = append(rev, ret[i])
+	}
+	return http.StatusOK, strings.Join(rev, "</br>")
+}
+
+func reviewV2Request(r *http.Request, w http.ResponseWriter, log *log.Logger, redisPool *sexredis.RedisPool, cfg *Cfg) (int, string) {
+	w.Header().Set("Content-Type", "text/html;charset=UTF-8")
+	rc, err := redisPool.Get()
+	defer redisPool.Close(rc)
+	if err != nil {
+		log.Printf("get redis connection of pool fails %s", err)
+		return http.StatusInternalServerError, RESPONSE_REDIS_NOK_TEXT
+	}
+	ret, _ := rc.LRange(cfg.V2RequestQueueName, 0, -1)
+	rev := make([]string, 0)
+	for i := len(ret) - 1; i >= 0; i-- {
+		rev = append(rev, ret[i])
+	}
+	return http.StatusOK, strings.Join(rev, "</br>")
 }
 
 func receiverV1(r *http.Request, w http.ResponseWriter, log *log.Logger, redisPool *sexredis.RedisPool, cfg *Cfg) (int, string) {
@@ -224,6 +257,8 @@ func main() {
 	if *receiverPtr {
 		mtn.Get("/receiver/v1", receiverV1)
 		mtn.Get("/receiver/v2", receiverV2)
+		mtn.Get("/review/v1", reviewV1Request)
+		mtn.Get("/review/v2", reviewV2Request)
 	}
 
 	if *receiverPtr {
