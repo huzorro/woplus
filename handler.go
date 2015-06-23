@@ -53,7 +53,6 @@ func (self *V1Handler) SProcess(msg *sexredis.Msg) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-
 	//	certs := x509.NewCertPool()
 
 	//	pemData, err := ioutil.ReadFile("iSimularClient.cer")
@@ -91,17 +90,12 @@ func (self *V1Handler) SProcess(msg *sexredis.Msg) {
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		self.log.Printf("v2 response body read fails %s", err)
-		msg.Err = errors.New("v2 response body read fails")
+		self.log.Printf("v1 response body read fails %s", err)
+		msg.Err = errors.New("v1 response body read fails")
 		return
 	}
 	defer resp.Body.Close()
 
-	if err != nil {
-		self.log.Printf("v1 response fails %s", err)
-		msg.Err = errors.New("v1 response fails")
-		return
-	}
 	if err := json.Unmarshal([]byte(vCode), &v); err != nil {
 		self.log.Printf("v1 josn Unmarshal fails %s", err)
 		msg.Err = errors.New("json Unmarshal fails")
@@ -226,12 +220,6 @@ func (self *V2Handler) SProcess(msg *sexredis.Msg) {
 		return
 	}
 	defer resp.Body.Close()
-
-	if err != nil {
-		self.log.Printf("v2 response fails %s", err)
-		msg.Err = errors.New("v2 response fails")
-		return
-	}
 
 	if err := json.Unmarshal(body, &r); err != nil {
 		self.log.Printf("josn Unmarshal fails %s", err)
